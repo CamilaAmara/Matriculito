@@ -7,7 +7,7 @@
 const CONFIG = {
 
   /* ── GROQ API ─────────────────────────────────────────── */
-  GROQ_API_KEY: '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',
+  GROQ_API_KEY: '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',
   GROQ_MODEL:   'llama-3.3-70b-versatile',
 
   /* ── EMAILJS (ya configurado) ────────────────────────── */
