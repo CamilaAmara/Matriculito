@@ -171,8 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.disconnect();
         setTimeout(() => {
           pushBot(
-            `¡Hola, Camila! 👋 Soy **Matriculito**, tu secretaria digital de Teleco 🎓\n\n` +
-            `Soy mucho más rápida y simpática que la secretaria de antes 😄 Dime en qué te puedo ayudar: ` +
+            `¡Hola, Camila! 👋 Soy **Matriculito**, tu secretario digital de Teleco 🎓\n\n` +
+            `Dime en qué te puedo ayudar: ` +
             `matrículas, certificados, excusas médicas, pagos, o si necesitas enviarle un correo a alguien.`
           );
           document.getElementById('fabBadge').style.display = 'block';
