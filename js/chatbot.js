@@ -1,18 +1,48 @@
 /**
  * chatbot.js – Matriculito
- * IA: Groq llama-3.3-70b | Email: EmailJS (envía al destinatario correcto)
+ * IA: Groq | Email: EmailJS | Contactos: localStorage
  */
+
+/* ══════════════════════════════════════════════
+   GESTIÓN DE CONTACTOS (localStorage)
+══════════════════════════════════════════════ */
+function loadContacts() {
+  try {
+    return JSON.parse(localStorage.getItem('matriculito_contacts') || '{}');
+  } catch { return {}; }
+}
+
+function saveContact(name, email) {
+  if (!email || !email.includes('@')) return;
+  const contacts = loadContacts();
+  // Usar el email como clave, nombre como valor
+  const key = email.toLowerCase().trim();
+  if (!contacts[key]) {
+    contacts[key] = name || email;
+    localStorage.setItem('matriculito_contacts', JSON.stringify(contacts));
+    console.log('Contacto guardado:', name, email);
+  }
+}
+
+function getContactsAsText() {
+  const contacts = loadContacts();
+  const entries  = Object.entries(contacts);
+  if (entries.length === 0) return '';
+  const lines = entries.map(([email, name]) => `- ${name}: ${email}`).join('\n');
+  return `\n════════════════════════════════════════════════\nCONTACTOS GUARDADOS POR EL ESTUDIANTE\n════════════════════════════════════════════════\nEstas personas ya han sido contactadas antes:\n${lines}\n`;
+}
 
 /* ══════════════════════════════════════════════
    SYSTEM PROMPT
 ══════════════════════════════════════════════ */
-const SYSTEM_PROMPT = `Eres Matriculito 🎓, la nueva secretaria digital de la Facultad de Ingeniería de Telecomunicaciones de la Universidad Santo Tomás (USTA), sede Bucaramanga. Reemplazas a la antigua secretaria que era lenta, grosera e ineficiente. Tú eres lo opuesto: rapidísima, simpática, proactiva y resolutiva. Tienes personalidad, haces chistes ocasionalmente, usas emojis con moderación y hablas de manera cercana y natural, como alguien que realmente quiere ayudarte.
+function buildSystemPrompt() {
+  return `Eres Matriculito 🎓, la nueva secretaria digital de la Facultad de Ingeniería de Telecomunicaciones de la Universidad Santo Tomás (USTA), sede Bucaramanga. Reemplazas a la antigua secretaria que era lenta, grosera e ineficiente. Tú eres lo opuesto: rapidísima, simpática, proactiva y resolutiva. Tienes personalidad, haces chistes ocasionalmente, usas emojis con moderación y hablas de manera cercana y natural, como alguien que realmente quiere ayudarte.
 
 REGLAS ABSOLUTAS:
 1. Solo hablas de temas académicos/administrativos de la USTA Bucaramanga. Si te preguntan otra cosa, redirige con humor: "¡Ajá! Para eso no fui entrenada, soy secretaria, no Google 😄 ¿en qué te puedo ayudar con la U?"
 2. Nunca inventas datos, correos o procesos que no conozcas.
 3. SIEMPRE confirmas antes de enviar un correo mostrando el borrador completo usando el marcador [EMAIL_DRAFT].
-4. Puedes enviar correos a CUALQUIER dirección que el estudiante te indique, aunque no esté en tu directorio. Si el estudiante dice "envíale a pepito@correo.com", lo haces sin problema.
+4. Puedes enviar correos a CUALQUIER dirección que el estudiante te indique, aunque no esté en tu directorio.
 5. El correo del estudiante (tu remitente) es: mariacamila.amara@ustabuca.edu.co
 6. NO puedes abrir ni cerrar cupos directamente. Solo gestionas peticiones por correo.
 7. Responde siempre en español colombiano natural y conversacional. NADA de respuestas robóticas.
@@ -63,11 +93,10 @@ Servicios Médicos: sermeflo@ustabuca.edu.co
 Investigación: maestria.proyectos@ustabuca.edu.co
 Soporte Investigación: p.soporteinvestigacion@ustabuca.edu.co
 
-NOTA IMPORTANTE: También puedes enviar correos a cualquier dirección adicional que el estudiante indique.
 ════════════════════════════════════════════════
 PROFESORES DE TELECOMUNICACIONES
 ════════════════════════════════════════════════
-Puedes enviarle correos directamente a los profesores por nombre o materia.
+Puedes enviarle correos directamente a los profesores por nombre o materia:
 
 - Edgar Mauricio Velasco Díaz → edgar.velasco@ustabuca.edu.co
 - Silene Beatriz Viloria Soto → silene.viloria@ustabuca.edu.co
@@ -76,8 +105,25 @@ Puedes enviarle correos directamente a los profesores por nombre o materia.
 - Francisco Javier Dietes Cárdenas → francisco.dietes@ustabuca.edu.co
 - Elvis Galvis → elvis.galvis@ustabuca.edu.co
 
-Si el estudiante dice "envíale al profe Velasco" o "escríbele a Silene", 
-usas el correo correspondiente sin pedirle que lo escriba manualmente.
+Si el estudiante dice "envíale al profe Velasco" o "escríbele a Silene", usas el correo correspondiente sin pedirle que lo escriba manualmente.
+
+════════════════════════════════════════════════
+PAGOS EN LÍNEA
+════════════════════════════════════════════════
+Cuando el estudiante pregunte por pagos, cómo pagar la matrícula, pago en línea o cualquier tema de pagos, SIEMPRE incluye este enlace directo:
+🔗 Portal de Pagos en Línea USTA: https://pagosenlinea.usantotomas.edu.co/
+
+Pasos para pagar en línea:
+1. Ingresa al portal: https://pagosenlinea.usantotomas.edu.co/
+2. Selecciona "Pago de matrícula"
+3. Ingresa tu código: 2377018
+4. Selecciona el concepto a pagar
+5. Elige el método de pago (PSE, tarjeta crédito/débito)
+6. Descarga el comprobante
+
+Para financiación o crédito educativo: crediusta@ustabuca.edu.co
+Para dudas sobre el recibo: admisiones.pregrado@usta.edu.co
+${getContactsAsText()}
 ════════════════════════════════════════════════
 FORMATO OBLIGATORIO PARA CORREOS
 ════════════════════════════════════════════════
@@ -100,8 +146,8 @@ Universidad Santo Tomás – Sede Bucaramanga
 [EMAIL_DRAFT_END]
 
 Después escribe algo natural como "¿Lo envío? 📤"
-Si no hay CC, omite esa línea completamente.
-`.trim();
+Si no hay CC, omite esa línea completamente.`.trim();
+}
 
 /* ══════════════════════════════════════════════
    ESTADO
@@ -112,15 +158,13 @@ let history     = [];
 let pendingMail = null;
 
 /* ══════════════════════════════════════════════
-   INIT – arranca después del login
+   INIT
 ══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Inicializar EmailJS con la key real
   if (typeof emailjs !== 'undefined') {
     emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);
   }
 
-  // Bienvenida del bot (se activa cuando la pantalla SAC aparece)
   const observer = new MutationObserver((mutations) => {
     for (const m of mutations) {
       if (m.target.classList.contains('visible')) {
@@ -173,7 +217,6 @@ async function sendBotMsg() {
   inp.value = '';
   document.getElementById('botQuick').style.display = 'none';
 
-  // ¿Esperando confirmación de correo?
   if (pendingMail) {
     const lo  = text.toLowerCase();
     const yes = ['sí','si','yes','confirmar','confirmo','enviar','envíalo','ok','dale','listo','claro','hazlo','mándalo','adelante','va','venga'].some(k => lo.includes(k));
@@ -206,7 +249,7 @@ async function callGroq(userMsg) {
       body: JSON.stringify({
         model: CONFIG.GROQ_MODEL,
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: buildSystemPrompt() },
           ...history,
         ],
         temperature: 0.75,
@@ -273,10 +316,6 @@ function parseDraft(block) {
 
 /* ══════════════════════════════════════════════
    ENVIAR CORREO – EMAILJS
-   ⚠️  El truco está en el template de EmailJS:
-       El campo "To Email" del template debe usar {{to_email}}
-       NO debe estar fijo a tu cuenta.
-       Así el correo llega al destinatario correcto.
 ══════════════════════════════════════════════ */
 async function doSendEmail() {
   if (!pendingMail) return;
@@ -292,37 +331,36 @@ async function doSendEmail() {
   pendingMail    = null;
 
   try {
-    const result = await emailjs.send(
+    await emailjs.send(
       CONFIG.EMAILJS_SERVICE_ID,
       CONFIG.EMAILJS_TEMPLATE_ID,
       {
-        // ─── DESTINATARIO ───────────────────────────
-        // En tu template de EmailJS el campo "To Email"
-        // DEBE ser: {{to_email}}  ← esto envía al correo correcto
-        to_email:   mailCopy.to,
-        to_name:    '',
-
-        // ─── CC (si aplica) ──────────────────────────
-        cc_email:   mailCopy.cc || '',
-
-        // ─── CONTENIDO ───────────────────────────────
-        subject:    mailCopy.subject,
-        message:    mailCopy.message,
-
-        // ─── REMITENTE ───────────────────────────────
-        from_name:  CONFIG.BOT_EMAIL_NAME,
-        reply_to:   CONFIG.BOT_EMAIL,
+        to_email:  mailCopy.to,
+        to_name:   '',
+        cc_email:  mailCopy.cc || '',
+        subject:   mailCopy.subject,
+        message:   mailCopy.message,
+        from_name: CONFIG.BOT_EMAIL_NAME,
+        reply_to:  CONFIG.BOT_EMAIL,
       }
     );
 
+    // ── Guardar contacto automáticamente ──────────
+    // Extraer nombre del asunto o usar el email como nombre
+    const nombreGuess = mailCopy.to.split('@')[0]; // ej: "silene.viloria"
+    saveContact(nombreGuess, mailCopy.to);
+    if (mailCopy.cc) {
+      const ccNombre = mailCopy.cc.split('@')[0];
+      saveContact(ccNombre, mailCopy.cc);
+    }
+
     removeTyping(tid);
-    console.log('EmailJS result:', result);
     pushBot(
       `✅ **¡Correo enviado!** 📤\n\n` +
       `📬 **Para:** ${mailCopy.to}\n` +
       (mailCopy.cc ? `📋 **CC:** ${mailCopy.cc}\n` : '') +
       `📝 **Asunto:** ${mailCopy.subject}\n\n` +
-      `Te responderán pronto. ¿Necesitas algo más? 😊`
+      `Guardé ese contacto para la próxima 😊 ¿Necesitas algo más?`
     );
     showToast('✅ Correo enviado correctamente', 'ok');
 
@@ -426,6 +464,8 @@ function md(text) {
   h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
   h = h.replace(/`(.+?)`/g, '<code style="background:#e4eeff;padding:1px 4px;border-radius:3px;font-size:11.5px">$1</code>');
+  // Convertir links en clickeables
+  h = h.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" style="color:#1b50b8;text-decoration:underline">$1</a>');
   h = h.replace(/\n/g, '<br>');
   return h;
 }
