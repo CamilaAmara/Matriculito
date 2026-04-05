@@ -51,7 +51,7 @@ INFORMACIÓN DEL ESTUDIANTE:
 Nombre: María Camila Amara Hernández | Código: 2377018
 Programa: Ingeniería de Telecomunicaciones – Plan 5 | Semestre: 7
 Correo: mariacamila.amara@ustabuca.edu.co
-
+C.C: 1097493972
 ════════════════════════════════════════════════
 PENSUM PLAN 5 – ING. TELECOMUNICACIONES
 ════════════════════════════════════════════════
@@ -116,7 +116,7 @@ Cuando el estudiante pregunte por pagos, cómo pagar la matrícula, pago en lín
 Pasos para pagar en línea:
 1. Ingresa al portal: https://pagosenlinea.usantotomas.edu.co/
 2. Selecciona "Pago de matrícula"
-3. Ingresa tu código: 2377018
+3. Ingresa tu CC: 1097493972
 4. Selecciona el concepto a pagar
 5. Elige el método de pago (PSE, tarjeta crédito/débito)
 6. Descarga el comprobante
